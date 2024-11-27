@@ -5,7 +5,7 @@ namespace AssetRipper.Bindings.MsPdbCore;
 
 public static unsafe partial class MsPdbCore
 {
-    internal static bool PDBOpen2W(string wszPDB, string szMode, out PDBErrors pec, out string error, out PDB* pppdb)
+    public static bool PDBOpen2W(string wszPDB, string szMode, out PDBErrors pec, out string error, out PDB* pppdb)
     {
         wszPDB += '\0';
         szMode += '\0';
@@ -28,7 +28,7 @@ public static unsafe partial class MsPdbCore
         return result;
     }
 
-    internal static bool PDBOpenDBI(PDB* ppdb, string szMode, string szTarget, out DBI* ppdbi)
+    public static bool PDBOpenDBI(PDB* ppdb, string szMode, string szTarget, out DBI* ppdbi)
     {
         szMode += '\0';
         szTarget += '\0';
@@ -39,7 +39,7 @@ public static unsafe partial class MsPdbCore
             return PDBOpenDBI(ppdb, (sbyte*)mb, (sbyte*)tb, ppdbiPtr).ToBoolean();
     }
 
-    internal static bool DBIOpenModW(DBI* pdbi, string szModule, string szFile, out Mod* ppmod)
+    public static bool DBIOpenModW(DBI* pdbi, string szModule, string szFile, out Mod* ppmod)
     {
         szFile += '\0';
         szModule += '\0';
@@ -50,11 +50,24 @@ public static unsafe partial class MsPdbCore
             return DBIOpenModW(pdbi, mp, fp, ppmodPtr).ToBoolean();
     }
 
-    internal static bool ModAddPublic2(Mod* pmod, string szPublic, ushort isect, int off, CV_PUBSYMFLAGS_e cvpsf = CV_PUBSYMFLAGS_e.None)
+    public static bool DBIAddPublic2(DBI* pdbi, string szPublic, ushort isect, int off, CV_PUBSYMFLAGS_e cvpsf = CV_PUBSYMFLAGS_e.None)
+    {
+        szPublic += '\0';
+        fixed (byte* mb = Encoding.UTF8.GetBytes(szPublic))
+            return DBIAddPublic2(pdbi, (sbyte*)mb, isect, off, (uint)cvpsf).ToBoolean();
+    }
+
+    public static bool ModAddPublic2(Mod* pmod, string szPublic, ushort isect, int off, CV_PUBSYMFLAGS_e cvpsf = CV_PUBSYMFLAGS_e.None)
     {
         szPublic += '\0';
         fixed (byte* mb = Encoding.UTF8.GetBytes(szPublic))
             return ModAddPublic2(pmod, (sbyte*)mb, isect, off, (uint)cvpsf).ToBoolean();
+    }
+
+    public static bool PDBQuerySignature2(PDB* ppdb, out Guid guid)
+    {
+        fixed (Guid* guidPtr = &guid)
+            return PDBQuerySignature2(ppdb, (_GUID*)guidPtr).ToBoolean();
     }
 
     private static bool ToBoolean(this int value) => value != 0;
